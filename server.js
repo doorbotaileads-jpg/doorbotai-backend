@@ -3,13 +3,13 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-const { createAgent, getAgent, updateAgent, deactivateAgent } = require('./services/agents');
-const { addLead, updateLead } = require('./services/sheets');
-const { sendBuyerEmail, sendAgentAlert, sendWelcomeEmail } = require('./services/email');
-const { makeVoiceCall } = require('./services/bland');
-const { bookAppointment } = require('./services/calendar');
-const { getStats, findLeads } = require('./services/database');
-const { scrapeLeads } = require('./services/scraper');
+const { createAgent, getAgent, updateAgent, deactivateAgent } = require('./agents');
+const { addLead, updateLead } = require('./sheets');
+const { sendBuyerEmail, sendAgentAlert, sendWelcomeEmail } = require('./email');
+const { makeVoiceCall } = require('./bland');
+const { bookAppointment } = require('./calendar');
+const { getStats, findLeads } = require('./database');
+const { scrapeLeads } = require('./scraper');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
