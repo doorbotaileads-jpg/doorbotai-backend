@@ -5,97 +5,119 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>DoorBot AI — Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
   --gold:#C9A84C;--gold-light:#E8C97A;--bg:#080808;--bg2:#0F0F0F;--bg3:#161616;
-  --border:rgba(201,168,76,0.15);--text:#F0EDE8;--muted:#777770;--red:#E05252;--green:#4CAF7D;
+  --border:rgba(201,168,76,0.15);--text:#F0EDE8;--muted:#777770;
+  --red:#E05252;--green:#4CAF7D;--blue:#5B9BD5;--purple:#9B59B6;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;}
-/* Layout */
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;}
-.main{margin-left:220px;padding:32px;min-height:100vh;}
-/* Sidebar */
-.logo{padding:24px 20px;border-bottom:1px solid var(--border);}
+.main{margin-left:220px;padding:28px;min-height:100vh;}
+.logo{padding:22px 20px;border-bottom:1px solid var(--border);}
 .logo h1{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);font-weight:500;}
 .logo p{font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;}
-.nav{padding:16px 0;flex:1;}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;color:var(--muted);cursor:pointer;transition:all 0.15s;border-left:2px solid transparent;}
+.nav{padding:12px 0;flex:1;overflow-y:auto;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:12px;color:var(--muted);cursor:pointer;transition:all 0.15s;border-left:2px solid transparent;}
 .nav-item:hover{color:var(--text);background:rgba(201,168,76,0.05);}
 .nav-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,0.08);}
-.nav-icon{width:16px;height:16px;opacity:0.7;}
-.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
-.agent-badge{background:rgba(201,168,76,0.1);border:1px solid var(--border);padding:8px 12px;border-radius:4px;}
+.nav-section{font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);padding:12px 20px 4px;opacity:0.6;}
+.sidebar-footer{padding:14px 20px;border-top:1px solid var(--border);}
+.agent-badge{background:rgba(201,168,76,0.08);border:1px solid var(--border);padding:8px 12px;border-radius:4px;}
 .agent-badge .name{font-size:12px;color:var(--text);font-weight:500;}
-.agent-badge .id{font-size:10px;color:var(--muted);margin-top:2px;}
-/* Tabs */
-.tab{display:none;}
-.tab.active{display:block;}
+.agent-badge .plan{font-size:10px;color:var(--gold);margin-top:2px;text-transform:uppercase;letter-spacing:0.08em;}
+.tab{display:none;}.tab.active{display:block;}
 /* Stats */
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
-.stat-card{background:var(--bg2);border:1px solid var(--border);padding:20px;position:relative;overflow:hidden;}
-.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:0.4;}
-.stat-label{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
-.stat-value{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--text);font-weight:300;}
-.stat-sub{font-size:11px;color:var(--muted);margin-top:4px;}
-/* Section headers */
-.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.section-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;color:var(--text);}
-/* Buttons */
-.btn{padding:8px 16px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;border:none;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);padding:18px;position:relative;overflow:hidden;}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;opacity:0.5;}
+.stat-card.gold::after{background:var(--gold);}
+.stat-card.green::after{background:var(--green);}
+.stat-card.blue::after{background:var(--blue);}
+.stat-card.purple::after{background:var(--purple);}
+.stat-label{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.stat-value{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+/* Charts */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:24px;}
+.chart-card{background:var(--bg2);border:1px solid var(--border);padding:16px;}
+.chart-card.wide{grid-column:span 2;}
+.chart-title{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.chart-wrap{position:relative;height:160px;}
+/* Section */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;}
+.btn{padding:7px 14px;font-size:11px;font-family:'DM Sans',sans-serif;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;border:none;}
 .btn-primary{background:var(--gold);color:#080808;}
 .btn-primary:hover{background:var(--gold-light);}
 .btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
 .btn-outline:hover{border-color:var(--gold);color:var(--gold);}
-.btn-sm{padding:5px 12px;font-size:11px;}
+.btn-danger{background:transparent;border:1px solid rgba(224,82,82,0.3);color:var(--red);}
+.btn-sm{padding:4px 10px;font-size:10px;}
 /* Tables */
-.table-wrap{background:var(--bg2);border:1px solid var(--border);overflow:hidden;}
-table{width:100%;border-collapse:collapse;}
-th{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);font-weight:400;}
-td{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;color:var(--text);}
+.table-wrap{background:var(--bg2);border:1px solid var(--border);overflow:hidden;overflow-x:auto;}
+table{width:100%;border-collapse:collapse;min-width:600px;}
+th{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);font-weight:400;white-space:nowrap;}
+td{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px;}
 tr:last-child td{border-bottom:none;}
 tr:hover td{background:rgba(201,168,76,0.03);}
-/* Badges */
-.badge{display:inline-block;padding:2px 8px;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;font-weight:500;}
+.badge{display:inline-block;padding:2px 7px;font-size:10px;letter-spacing:0.04em;text-transform:uppercase;font-weight:500;border-radius:2px;}
 .badge-hot{background:rgba(76,175,125,0.15);color:#4CAF7D;border:1px solid rgba(76,175,125,0.3);}
 .badge-warm{background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid rgba(201,168,76,0.3);}
 .badge-cold{background:rgba(119,119,112,0.15);color:var(--muted);border:1px solid rgba(119,119,112,0.3);}
-.badge-new{background:rgba(255,255,255,0.08);color:var(--text);border:1px solid rgba(255,255,255,0.12);}
+.badge-new{background:rgba(255,255,255,0.06);color:var(--text);border:1px solid rgba(255,255,255,0.1);}
+.badge-dnc{background:rgba(224,82,82,0.15);color:var(--red);border:1px solid rgba(224,82,82,0.3);}
 /* Forms */
-.form-section{background:var(--bg2);border:1px solid var(--border);padding:24px;margin-bottom:20px;}
-.form-section h3{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-section{background:var(--bg2);border:1px solid var(--border);padding:20px;margin-bottom:16px;}
+.form-section h3{font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--gold);margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
 .form-group.full{grid-column:1/-1;}
 label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
-input,select,textarea{background:#0A0A0A;border:1px solid var(--border);color:var(--text);padding:10px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;width:100%;}
+input,select,textarea{background:#0A0A0A;border:1px solid var(--border);color:var(--text);padding:9px 11px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;width:100%;}
 input:focus,select:focus,textarea:focus{border-color:var(--gold);}
-textarea{resize:vertical;min-height:80px;}
+textarea{resize:vertical;min-height:70px;}
 select option{background:#0A0A0A;}
-/* Off days */
-.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:8px;}
-.day-btn{padding:8px 4px;text-align:center;font-size:11px;cursor:pointer;background:#0A0A0A;border:1px solid var(--border);color:var(--muted);transition:all 0.15s;}
+/* Days */
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:6px;}
+.day-btn{padding:7px 4px;text-align:center;font-size:11px;cursor:pointer;background:#0A0A0A;border:1px solid var(--border);color:var(--muted);transition:all 0.15s;}
 .day-btn.selected{background:rgba(201,168,76,0.15);border-color:var(--gold);color:var(--gold);}
-/* Source cards */
-.source-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
-.source-card{background:var(--bg2);border:1px solid var(--border);padding:20px;cursor:pointer;transition:border-color 0.2s;}
-.source-card:hover{border-color:var(--gold);}
-.source-card h4{font-size:13px;font-weight:500;margin-bottom:6px;}
-.source-card p{font-size:11px;color:var(--muted);line-height:1.6;}
-.source-card .source-icon{font-size:20px;margin-bottom:10px;}
-/* Code block */
-.code-block{background:#0A0A0A;border:1px solid var(--border);padding:14px;font-family:monospace;font-size:12px;color:var(--gold);word-break:break-all;position:relative;}
-.copy-btn{position:absolute;top:8px;right:8px;background:var(--border);border:none;color:var(--muted);padding:4px 10px;font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+/* Code */
+.code-block{background:#0A0A0A;border:1px solid var(--border);padding:12px;font-family:monospace;font-size:11px;color:var(--gold);word-break:break-all;position:relative;line-height:1.5;}
+.copy-btn{position:absolute;top:6px;right:6px;background:var(--border);border:none;color:var(--muted);padding:3px 8px;font-size:9px;cursor:pointer;font-family:'DM Sans',sans-serif;text-transform:uppercase;}
 .copy-btn:hover{background:var(--gold);color:#080808;}
-/* Upload zone */
-.upload-zone{border:2px dashed var(--border);padding:40px;text-align:center;cursor:pointer;transition:border-color 0.2s;}
+/* Upload */
+.upload-zone{border:2px dashed var(--border);padding:32px;text-align:center;cursor:pointer;transition:border-color 0.2s;}
 .upload-zone:hover{border-color:var(--gold);}
-.upload-zone p{color:var(--muted);font-size:13px;margin-top:8px;}
+.upload-zone p{color:var(--muted);font-size:12px;margin-top:6px;}
+/* Legal */
+.legal-box{background:#0A0A0A;border:1px solid var(--border);padding:16px;font-size:11px;color:var(--muted);line-height:1.7;max-height:300px;overflow-y:auto;font-family:monospace;white-space:pre-wrap;}
+.disclaimer-box{background:rgba(224,82,82,0.05);border:1px solid rgba(224,82,82,0.2);padding:14px;margin-bottom:16px;}
+.disclaimer-box p{font-size:12px;color:var(--red);line-height:1.6;}
+.disclaimer-box strong{display:block;margin-bottom:6px;font-size:13px;}
 /* Toast */
-#toast{position:fixed;bottom:24px;right:24px;background:var(--gold);color:#080808;padding:12px 20px;font-size:13px;font-weight:500;transform:translateY(80px);transition:transform 0.3s;z-index:999;}
+#toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;font-size:12px;font-weight:500;transform:translateY(60px);transition:transform 0.3s;z-index:999;}
 #toast.show{transform:translateY(0);}
-/* Loading */
-.loader{text-align:center;padding:60px;color:var(--muted);}
+/* Mode cards */
+.mode-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+.mode-card{background:var(--bg2);border:1px solid var(--border);padding:18px;transition:border-color 0.2s;}
+.mode-card:hover{border-color:var(--gold);}
+.mode-card .mode-icon{font-size:22px;margin-bottom:10px;}
+.mode-card h4{font-size:13px;font-weight:500;margin-bottom:6px;color:var(--text);}
+.mode-card p{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:12px;}
+.legal-tag{display:inline-block;font-size:9px;padding:2px 6px;border-radius:2px;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:8px;}
+.legal-tag.safe{background:rgba(76,175,125,0.15);color:var(--green);border:1px solid rgba(76,175,125,0.3);}
+.legal-tag.caution{background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid rgba(201,168,76,0.3);}
+/* Progress bar */
+.progress-bar{height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;margin-top:6px;}
+.progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:width 0.5s;}
+/* Alert */
+.alert{padding:10px 14px;margin-bottom:14px;font-size:12px;border-radius:2px;display:flex;align-items:flex-start;gap:8px;}
+.alert-info{background:rgba(91,155,213,0.1);border:1px solid rgba(91,155,213,0.25);color:#5B9BD5;}
+.alert-warning{background:rgba(201,168,76,0.1);border:1px solid rgba(201,168,76,0.25);color:var(--gold);}
+.alert-success{background:rgba(76,175,125,0.1);border:1px solid rgba(76,175,125,0.25);color:var(--green);}
 </style>
 </head>
 <body>
@@ -106,399 +128,515 @@ select option{background:#0A0A0A;}
     <p>We open the door</p>
   </div>
   <nav class="nav">
-    <div class="nav-item active" onclick="showTab('overview')">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+    <div class="nav-section">Main</div>
+    <div class="nav-item active" onclick="showTab('overview',this)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
       Overview
     </div>
-    <div class="nav-item" onclick="showTab('leads')">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-      Leads
+    <div class="nav-item" onclick="showTab('leads',this)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      All Leads
     </div>
-    <div class="nav-item" onclick="showTab('sources')">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-      Lead Sources
+    <div class="nav-section">Lead Sources</div>
+    <div class="nav-item" onclick="showTab('mode1',this)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      Mode 1 — Ads
     </div>
-    <div class="nav-item" onclick="showTab('training')">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+    <div class="nav-item" onclick="showTab('mode2',this)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      Mode 2 — CSV
+    </div>
+    <div class="nav-item" onclick="showTab('mode3',this)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      Mode 3 — FSBO
+    </div>
+    <div class="nav-section">Settings</div>
+    <div class="nav-item" onclick="showTab('training',this)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
       Train Bot
     </div>
-    <div class="nav-item" onclick="showTab('offdays')">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+    <div class="nav-item" onclick="showTab('offdays',this)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
       Off Days
     </div>
-    <div class="nav-item" onclick="showTab('embed')">
-      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+    <div class="nav-item" onclick="showTab('embed',this)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
       Embed & Links
+    </div>
+    <div class="nav-item" onclick="showTab('legal',this)">
+      <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+      Legal & Compliance
     </div>
   </nav>
   <div class="sidebar-footer">
     <div class="agent-badge">
       <div class="name" id="sb-name">Loading...</div>
-      <div class="id" id="sb-id">—</div>
+      <div class="plan" id="sb-plan">—</div>
     </div>
   </div>
 </div>
 
 <div class="main">
 
-  <!-- OVERVIEW TAB -->
-  <div class="tab active" id="tab-overview">
-    <div class="section-head" style="margin-bottom:24px;">
-      <div>
-        <h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;">Good <span id="greeting-time">morning</span>, <span id="greeting-name">Agent</span></h2>
-        <p style="color:var(--muted);font-size:13px;margin-top:4px;">Here's your DoorBot AI summary</p>
-      </div>
-      <button class="btn btn-outline btn-sm" onclick="loadDashboard()">↻ Refresh</button>
+<!-- OVERVIEW -->
+<div class="tab active" id="tab-overview">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+    <div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;">Good <span id="greeting-time">morning</span>, <span id="greeting-name">Agent</span></h2>
+      <p style="color:var(--muted);font-size:12px;margin-top:3px;">DoorBot AI — <span id="today-date"></span></p>
     </div>
+    <button class="btn btn-outline btn-sm" onclick="loadDashboard()">↻ Refresh</button>
+  </div>
 
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Total Leads</div>
-        <div class="stat-value" id="stat-total">—</div>
-        <div class="stat-sub">All time</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Hot Leads</div>
-        <div class="stat-value" id="stat-hot" style="color:var(--green)">—</div>
-        <div class="stat-sub">Appointment booked</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Appointments</div>
-        <div class="stat-value" id="stat-appts">—</div>
-        <div class="stat-sub">Booked by bot</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Conversion</div>
-        <div class="stat-value" id="stat-conv" style="color:var(--gold)">—</div>
-        <div class="stat-sub">Lead to appointment</div>
-      </div>
+  <div class="stats-grid">
+    <div class="stat-card gold">
+      <div class="stat-label">Total Leads</div>
+      <div class="stat-value" id="stat-total">—</div>
+      <div class="stat-sub">All time</div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-total" style="width:0%"></div></div>
     </div>
+    <div class="stat-card green">
+      <div class="stat-label">Hot Leads</div>
+      <div class="stat-value" id="stat-hot" style="color:var(--green)">—</div>
+      <div class="stat-sub">Appointment booked</div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-hot" style="width:0%;background:var(--green)"></div></div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-label">Appointments</div>
+      <div class="stat-value" id="stat-appts" style="color:var(--blue)">—</div>
+      <div class="stat-sub">Booked by bot</div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-appts" style="width:0%;background:var(--blue)"></div></div>
+    </div>
+    <div class="stat-card purple">
+      <div class="stat-label">Conversion</div>
+      <div class="stat-value" id="stat-conv" style="color:var(--purple)">—</div>
+      <div class="stat-sub">Lead to appointment</div>
+      <div class="progress-bar"><div class="progress-fill" id="prog-conv" style="width:0%;background:var(--purple)"></div></div>
+    </div>
+  </div>
 
-    <div class="section-head">
-      <div class="section-title">Recent Leads</div>
-      <button class="btn btn-outline btn-sm" onclick="showTab('leads')">View All</button>
+  <div class="charts-grid">
+    <div class="chart-card">
+      <div class="chart-title">Lead Status</div>
+      <div class="chart-wrap"><canvas id="chart-status"></canvas></div>
     </div>
+    <div class="chart-card">
+      <div class="chart-title">Lead Sources</div>
+      <div class="chart-wrap"><canvas id="chart-sources"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Call Outcomes</div>
+      <div class="chart-wrap"><canvas id="chart-outcomes"></canvas></div>
+    </div>
+  </div>
+
+  <div class="section-head">
+    <div class="section-title">Recent Leads</div>
+    <button class="btn btn-outline btn-sm" onclick="showTab('leads',null)">View All →</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Name</th><th>Phone</th><th>Budget</th><th>City</th><th>Status</th><th>Reason</th><th>DNC</th><th>Date</th></tr></thead>
+      <tbody id="recent-leads"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:28px;">Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ALL LEADS -->
+<div class="tab" id="tab-leads">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;">All Leads</h2>
+    <div style="display:flex;gap:8px;">
+      <select id="filter-status" onchange="filterLeads()" style="padding:5px 9px;font-size:11px;width:120px;">
+        <option value="">All Status</option>
+        <option value="hot">Hot</option><option value="warm">Warm</option>
+        <option value="cold">Cold</option><option value="new">New</option>
+      </select>
+      <select id="filter-source" onchange="filterLeads()" style="padding:5px 9px;font-size:11px;width:150px;">
+        <option value="">All Sources</option>
+        <option value="landing_page">Landing Page</option>
+        <option value="facebook_ads">Facebook Ads</option>
+        <option value="csv_upload">CSV Upload</option>
+        <option value="fsbo">FSBO</option>
+        <option value="expired_listing">Expired Listing</option>
+      </select>
+    </div>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Budget</th><th>City</th><th>Status</th><th>Outcome</th><th>Reason</th><th>DNC</th><th>Source</th><th>Date</th></tr></thead>
+      <tbody id="all-leads"><tr><td colspan="11" style="text-align:center;color:var(--muted);padding:28px;">Loading...</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODE 1 -->
+<div class="tab" id="tab-mode1">
+  <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;margin-bottom:6px;">Mode 1 — Ads Leads</h2>
+  <div class="alert alert-success" style="margin-bottom:20px;">
+    <span>✅</span>
+    <span><strong>100% TCPA Compliant</strong> — Lead fills your form, gives consent, bot calls. Fully legal under 1-to-1 consent rules.</span>
+  </div>
+  <div class="form-section">
+    <h3>Your Landing Page (Google Ads / Facebook)</h3>
+    <p style="color:var(--muted);font-size:11px;margin-bottom:12px;">Send ad traffic here — lead fills form → gives consent → bot calls in 60 seconds.</p>
+    <div class="code-block" id="landing-link">Loading...<button class="copy-btn" onclick="copyText('landing-link')">Copy</button></div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button class="btn btn-primary btn-sm" id="preview-btn">Preview Page</button>
+      <button class="btn btn-outline btn-sm" onclick="showTab('embed',null)">Get Embed Code</button>
+    </div>
+  </div>
+  <div class="form-section">
+    <h3>Facebook Lead Ads Webhook</h3>
+    <p style="color:var(--muted);font-size:11px;margin-bottom:12px;">Connect Facebook Lead Ads — leads auto-import and bot calls instantly.</p>
+    <div class="code-block" id="fb-webhook">Loading...<button class="copy-btn" onclick="copyText('fb-webhook')">Copy</button></div>
+    <p style="color:var(--muted);font-size:10px;margin-top:6px;">Verify token: <span style="color:var(--gold);font-family:monospace;">doorbotai_verify</span></p>
+  </div>
+</div>
+
+<!-- MODE 2 -->
+<div class="tab" id="tab-mode2">
+  <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;margin-bottom:6px;">Mode 2 — CSV Upload</h2>
+  <div class="alert alert-warning" style="margin-bottom:16px;">
+    <span>⚠️</span>
+    <span><strong>Your Responsibility</strong> — Only upload contacts who have given express written consent to be contacted by YOUR business. You are the caller of record.</span>
+  </div>
+  <div class="disclaimer-box">
+    <strong>⚖️ TCPA/CASL COMPLIANCE DECLARATION</strong>
+    <p id="csv-disclaimer-text">Loading...</p>
+  </div>
+  <div class="form-section">
+    <h3>Upload Leads CSV</h3>
+    <p style="color:var(--muted);font-size:11px;margin-bottom:12px;">Format: name, phone, email, budget, city (headers required)</p>
+    <div class="upload-zone" onclick="document.getElementById('csv-file').click()">
+      <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--muted);margin:0 auto;display:block;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+      <p style="margin-top:8px;font-weight:500;">Click to upload CSV</p>
+      <p style="font-size:10px;margin-top:3px;">Bot calls each lead + DNC check automatic</p>
+    </div>
+    <input type="file" id="csv-file" accept=".csv" style="display:none;" onchange="uploadCSV(this)"/>
+    <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+      <input type="checkbox" id="csv-consent" style="width:14px;height:14px;"/>
+      <label for="csv-consent" style="font-size:11px;color:var(--muted);text-transform:none;letter-spacing:0;">
+        I confirm all contacts have given prior express written consent per TCPA/CASL requirements
+      </label>
+    </div>
+    <div id="csv-result" style="margin-top:10px;font-size:11px;color:var(--muted);"></div>
+  </div>
+</div>
+
+<!-- MODE 3 -->
+<div class="tab" id="tab-mode3">
+  <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;margin-bottom:6px;">Mode 3 — FSBO & Expired Listings</h2>
+  <div class="alert alert-success" style="margin-bottom:16px;">
+    <span>✅</span>
+    <span><strong>Legally Safe</strong> — NAR guidelines allow contacting FSBO sellers and expired listings. Bot identifies itself as AI on every call.</span>
+  </div>
+  <div class="mode-grid">
+    <div class="mode-card">
+      <div class="mode-icon">🏡</div>
+      <span class="legal-tag safe">TCPA Safe</span>
+      <h4>FSBO Leads</h4>
+      <p>For Sale By Owner listings — sellers actively trying to sell without an agent. Bot pitches agent's services.</p>
+      <button class="btn btn-primary btn-sm" onclick="findFSBO()">Find FSBO Leads</button>
+    </div>
+    <div class="mode-card">
+      <div class="mode-icon">📋</div>
+      <span class="legal-tag safe">TCPA Safe</span>
+      <h4>Expired Listings</h4>
+      <p>Upload expired MLS listings from your broker. Bot calls with re-listing pitch.</p>
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('expired-file').click()">Upload Expired</button>
+      <input type="file" id="expired-file" accept=".csv" style="display:none;" onchange="uploadExpired(this)"/>
+    </div>
+    <div class="mode-card">
+      <div class="mode-icon">🔍</div>
+      <span class="legal-tag caution">Manual Review</span>
+      <h4>Research Helper</h4>
+      <p>Get search URLs to find leads manually. You verify consent before uploading to Mode 2.</p>
+      <button class="btn btn-outline btn-sm" onclick="getResearchURLs()">Get Search URLs</button>
+    </div>
+  </div>
+  <div id="mode3-result" style="font-size:11px;color:var(--muted);margin-top:8px;"></div>
+</div>
+
+<!-- TRAINING -->
+<div class="tab" id="tab-training">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;">Train Your Bot</h2>
+    <button class="btn btn-primary" onclick="saveTraining()">Save & Apply Changes</button>
+  </div>
+  <div class="alert alert-info" style="margin-bottom:16px;">
+    <span>ℹ️</span>
+    <span>Bot automatically identifies itself as AI on every call — TCPA compliant by design.</span>
+  </div>
+  <div class="form-section">
+    <h3>Bot Identity</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>Bot Name (buyers hear this)</label><input type="text" id="t-botName" placeholder="e.g. James AI, Miami Home Finder"/></div>
+      <div class="form-group"><label>Your City / Market</label><input type="text" id="t-city" placeholder="e.g. Miami, FL"/></div>
+      <div class="form-group"><label>Property Types</label><input type="text" id="t-propertyTypes" placeholder="Single Family, Condos, Townhomes"/></div>
+      <div class="form-group"><label>Price Range</label><input type="text" id="t-priceRange" placeholder="$300K – $1.5M"/></div>
+      <div class="form-group"><label>Tone</label>
+        <select id="t-tone">
+          <option>Friendly & Approachable</option><option>Professional & Formal</option>
+          <option>Luxury & Exclusive</option><option>Direct & No-nonsense</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Language</label>
+        <select id="t-language">
+          <option>English</option><option>Spanish</option><option>French (Canada)</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Calendly Link</label><input type="text" id="t-calendlyLink" placeholder="https://calendly.com/yourusername"/></div>
+      <div class="form-group"><label>Notification Email</label><input type="email" id="t-notificationEmail" placeholder="your@email.com"/></div>
+      <div class="form-group full"><label>About You</label><textarea id="t-about" placeholder="I have 10 years experience in Miami luxury real estate..."></textarea></div>
+    </div>
+  </div>
+  <div class="form-section">
+    <h3>Scripts & Objections</h3>
+    <div class="form-grid">
+      <div class="form-group full"><label>FAQs (Q: ... A: ...)</label>
+        <textarea id="t-faqs" rows="4" placeholder="Q: Do you work with first time buyers? A: Absolutely!..."></textarea>
+      </div>
+      <div class="form-group full"><label>Situational Scripts</label>
+        <textarea id="t-situationalScripts" rows="4" placeholder="First time buyer: Focus on affordability...&#10;Investor: Emphasize ROI...&#10;Seller: Mention your marketing strategy..."></textarea>
+      </div>
+      <div class="form-group full"><label>Objection Handling</label>
+        <textarea id="t-objectionHandling" rows="4" placeholder="Too expensive: I understand, let me show options in your budget...&#10;Not ready: Can I send you listings to stay informed?"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- OFF DAYS -->
+<div class="tab" id="tab-offdays">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;">
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;">Off Days & Hours</h2>
+    <button class="btn btn-primary" onclick="saveOffDays()">Save Schedule</button>
+  </div>
+  <div class="alert alert-info" style="margin-bottom:16px;">
+    <span>ℹ️</span>
+    <span>TCPA requires calls only between 8 AM - 9 PM local time. Bot automatically respects these hours.</span>
+  </div>
+  <div class="form-section">
+    <h3>Weekly Off Days</h3>
+    <p style="color:var(--muted);font-size:11px;margin-bottom:10px;">Bot books appointments on next available working day if lead picks an off day.</p>
+    <div class="days-grid">
+      <div class="day-btn" onclick="toggleDay(this,'Sunday')">Sun</div>
+      <div class="day-btn" onclick="toggleDay(this,'Monday')">Mon</div>
+      <div class="day-btn" onclick="toggleDay(this,'Tuesday')">Tue</div>
+      <div class="day-btn" onclick="toggleDay(this,'Wednesday')">Wed</div>
+      <div class="day-btn" onclick="toggleDay(this,'Thursday')">Thu</div>
+      <div class="day-btn" onclick="toggleDay(this,'Friday')">Fri</div>
+      <div class="day-btn" onclick="toggleDay(this,'Saturday')">Sat</div>
+    </div>
+    <p style="color:var(--muted);font-size:10px;margin-top:8px;">Selected = OFF days</p>
+  </div>
+  <div class="form-section">
+    <h3>Working Hours</h3>
+    <div class="form-grid">
+      <div class="form-group"><label>Start Time</label>
+        <select id="work-start"><option value="8">8:00 AM</option><option value="9" selected>9:00 AM</option><option value="10">10:00 AM</option></select>
+      </div>
+      <div class="form-group"><label>End Time</label>
+        <select id="work-end"><option value="17">5:00 PM</option><option value="18" selected>6:00 PM</option><option value="19">7:00 PM</option><option value="20">8:00 PM</option><option value="21">9:00 PM (TCPA max)</option></select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EMBED -->
+<div class="tab" id="tab-embed">
+  <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;margin-bottom:20px;">Embed & Links</h2>
+  <div class="form-section">
+    <h3>Website Widget</h3>
+    <p style="color:var(--muted);font-size:11px;margin-bottom:10px;">Add to your website — "Talk to AI" button appears. Lead clicks → bot calls them.</p>
+    <div class="code-block" id="embed-code">Loading...<button class="copy-btn" onclick="copyText('embed-code')">Copy</button></div>
+  </div>
+  <div class="form-section">
+    <h3>Google Ads / Facebook Landing Page</h3>
+    <div class="code-block" id="embed-landing">Loading...<button class="copy-btn" onclick="copyText('embed-landing')">Copy</button></div>
+  </div>
+  <div class="form-section">
+    <h3>Your Agent ID</h3>
+    <p style="color:var(--muted);font-size:11px;margin-bottom:10px;">Use this ID to access your dashboard from any device.</p>
+    <div class="code-block" id="agent-id-display">Loading...<button class="copy-btn" onclick="copyText('agent-id-display')">Copy</button></div>
+  </div>
+</div>
+
+<!-- LEGAL -->
+<div class="tab" id="tab-legal">
+  <h2 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;margin-bottom:20px;">Legal & Compliance</h2>
+
+  <div class="alert alert-success" style="margin-bottom:16px;">
+    <span>✅</span>
+    <span><strong>DoorBot AI is TCPA & CASL compliant by design</strong> — AI identification on every call, DNC checking, opt-out mechanisms built in.</span>
+  </div>
+
+  <div class="form-section">
+    <h3>TCPA Compliance Status</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px;">
+      <div style="background:#0A0A0A;padding:10px 14px;border:1px solid var(--border);font-size:11px;">
+        <span style="color:var(--green);">✅</span> AI identification on every call
+      </div>
+      <div style="background:#0A0A0A;padding:10px 14px;border:1px solid var(--border);font-size:11px;">
+        <span style="color:var(--green);">✅</span> DNC check before every call
+      </div>
+      <div style="background:#0A0A0A;padding:10px 14px;border:1px solid var(--border);font-size:11px;">
+        <span style="color:var(--green);">✅</span> Opt-out mechanism in every call
+      </div>
+      <div style="background:#0A0A0A;padding:10px 14px;border:1px solid var(--border);font-size:11px;">
+        <span style="color:var(--green);">✅</span> 8AM-9PM calling hours only
+      </div>
+      <div style="background:#0A0A0A;padding:10px 14px;border:1px solid var(--border);font-size:11px;">
+        <span style="color:var(--green);">✅</span> Consent captured on landing page
+      </div>
+      <div style="background:#0A0A0A;padding:10px 14px;border:1px solid var(--border);font-size:11px;">
+        <span style="color:var(--green);">✅</span> Call recordings available
+      </div>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h3>Terms of Service</h3>
+    <div class="legal-box" id="tos-text">Loading...</div>
+    <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="copyLegal('tos-text')">Copy ToS</button>
+  </div>
+
+  <div class="form-section">
+    <h3>Privacy Policy</h3>
+    <div class="legal-box" id="pp-text">Loading...</div>
+    <button class="btn btn-outline btn-sm" style="margin-top:10px;" onclick="copyLegal('pp-text')">Copy Privacy Policy</button>
+  </div>
+
+  <div class="form-section">
+    <h3>DNC Opt-Out Log</h3>
+    <p style="color:var(--muted);font-size:11px;margin-bottom:10px;">Contacts who opted out — never called again automatically.</p>
     <div class="table-wrap">
       <table>
-        <thead><tr>
-          <th>Name</th><th>Phone</th><th>Budget</th><th>City</th><th>Status</th><th>Reason</th><th>Date</th>
-        </tr></thead>
-        <tbody id="recent-leads">
-          <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;">Loading leads...</td></tr>
-        </tbody>
+        <thead><tr><th>Phone</th><th>Name</th><th>Opted Out</th><th>Method</th></tr></thead>
+        <tbody id="dnc-log"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px;">No opt-outs recorded</td></tr></tbody>
       </table>
     </div>
   </div>
-
-  <!-- LEADS TAB -->
-  <div class="tab" id="tab-leads">
-    <div class="section-head" style="margin-bottom:24px;">
-      <h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;">All Leads</h2>
-      <div style="display:flex;gap:8px;">
-        <select id="filter-status" onchange="filterLeads()" style="padding:6px 10px;font-size:12px;width:140px;">
-          <option value="">All Status</option>
-          <option value="hot">Hot</option>
-          <option value="warm">Warm</option>
-          <option value="cold">Cold</option>
-          <option value="new">New</option>
-        </select>
-        <select id="filter-source" onchange="filterLeads()" style="padding:6px 10px;font-size:12px;width:160px;">
-          <option value="">All Sources</option>
-          <option value="landing_page">Landing Page</option>
-          <option value="facebook_ads">Facebook Ads</option>
-          <option value="csv_upload">CSV Upload</option>
-          <option value="email_click">Email Click</option>
-        </select>
-      </div>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>Name</th><th>Phone</th><th>Email</th><th>Budget</th><th>City</th><th>Status</th><th>Call Outcome</th><th>Reason</th><th>Source</th><th>Date</th>
-        </tr></thead>
-        <tbody id="all-leads">
-          <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:32px;">Loading...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- SOURCES TAB -->
-  <div class="tab" id="tab-sources">
-    <h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-bottom:24px;">Lead Sources</h2>
-
-    <div class="source-grid">
-      <div class="source-card" onclick="showTab('embed')">
-        <div class="source-icon">🌐</div>
-        <h4>Website Widget</h4>
-        <p>Add a "Talk to AI" button to your website. Buyers click → bot calls them.</p>
-      </div>
-      <div class="source-card" onclick="showTab('embed')">
-        <div class="source-icon">📢</div>
-        <h4>Google / Facebook Ads</h4>
-        <p>Send ad traffic to your dedicated landing page. Bot calls leads instantly.</p>
-      </div>
-      <div class="source-card" onclick="showTab('leads')">
-        <div class="source-icon">📋</div>
-        <h4>CSV Upload</h4>
-        <p>Upload existing leads. Bot reactivates them with personalized calls.</p>
-      </div>
-    </div>
-
-    <!-- CSV Upload -->
-    <div class="form-section">
-      <h3>Mode 2 — Upload Existing Leads</h3>
-      <p style="color:var(--muted);font-size:12px;margin-bottom:16px;">CSV format: name, phone, email, budget, city (headers required)</p>
-      <div class="upload-zone" onclick="document.getElementById('csv-file').click()">
-        <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--muted);margin:0 auto;display:block;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-        <p>Click to upload CSV file</p>
-        <p style="font-size:11px;margin-top:4px;">Bot will call each lead automatically</p>
-      </div>
-      <input type="file" id="csv-file" accept=".csv" style="display:none;" onchange="uploadCSV(this)"/>
-      <div id="csv-result" style="margin-top:12px;font-size:12px;color:var(--muted);"></div>
-    </div>
-
-    <!-- Mode 3 Scraper -->
-    <div class="form-section">
-      <h3>Mode 3 — Auto Lead Scraper</h3>
-      <p style="color:var(--muted);font-size:12px;margin-bottom:16px;">Bot will scrape Craigslist for leads in your city and call them automatically.</p>
-      <button class="btn btn-primary" onclick="startScraper()">Start Auto Scraper</button>
-      <div id="scraper-result" style="margin-top:12px;font-size:12px;color:var(--muted);"></div>
-    </div>
-  </div>
-
-  <!-- TRAINING TAB -->
-  <div class="tab" id="tab-training">
-    <div class="section-head" style="margin-bottom:24px;">
-      <h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;">Train Your Bot</h2>
-      <button class="btn btn-primary" onclick="saveTraining()">Save Changes</button>
-    </div>
-
-    <div class="form-section">
-      <h3>Bot Identity</h3>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Bot Name (buyers will hear this)</label>
-          <input type="text" id="t-botName" placeholder="e.g. James AI, Miami Home Finder"/>
-        </div>
-        <div class="form-group">
-          <label>Your City / Market</label>
-          <input type="text" id="t-city" placeholder="e.g. Miami, FL"/>
-        </div>
-        <div class="form-group">
-          <label>Property Types</label>
-          <input type="text" id="t-propertyTypes" placeholder="Single Family, Condos, Townhomes"/>
-        </div>
-        <div class="form-group">
-          <label>Price Range</label>
-          <input type="text" id="t-priceRange" placeholder="$300K – $1.5M"/>
-        </div>
-        <div class="form-group">
-          <label>Tone</label>
-          <select id="t-tone">
-            <option>Friendly & Approachable</option>
-            <option>Professional & Formal</option>
-            <option>Luxury & Exclusive</option>
-            <option>Direct & No-nonsense</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Language</label>
-          <select id="t-language">
-            <option>English</option>
-            <option>Spanish</option>
-            <option>French (Canada)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Calendly Link</label>
-          <input type="text" id="t-calendlyLink" placeholder="https://calendly.com/yourusername"/>
-        </div>
-        <div class="form-group">
-          <label>Notification Email</label>
-          <input type="email" id="t-notificationEmail" placeholder="your@email.com"/>
-        </div>
-        <div class="form-group full">
-          <label>About You (optional — bot will mention this)</label>
-          <textarea id="t-about" placeholder="e.g. I have 10 years experience in Miami luxury real estate..."></textarea>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h3>FAQs & Scripts</h3>
-      <div class="form-grid">
-        <div class="form-group full">
-          <label>Common FAQs (format: Q: ... A: ...)</label>
-          <textarea id="t-faqs" rows="5" placeholder="Q: Do you work with first time buyers? A: Absolutely! I love helping first time buyers...
-Q: What areas do you cover? A: I specialize in Miami, Coral Gables, and Brickell..."></textarea>
-        </div>
-        <div class="form-group full">
-          <label>Situational Scripts</label>
-          <textarea id="t-situationalScripts" rows="5" placeholder="First time buyer: Focus on affordability, explain the buying process step by step...
-Investor: Emphasize ROI, rental yields, appreciation rates...
-Seller: Mention your marketing strategy, comparable sales..."></textarea>
-        </div>
-        <div class="form-group full">
-          <label>Objection Handling</label>
-          <textarea id="t-objectionHandling" rows="4" placeholder="Too expensive: I understand your concern. Let me show you some great options in your budget...
-Already have an agent: I respect that! If anything changes, I'm here to help...
-Not ready yet: Totally fine! Can I send you listings to keep you informed?"></textarea>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- OFF DAYS TAB -->
-  <div class="tab" id="tab-offdays">
-    <div class="section-head" style="margin-bottom:24px;">
-      <h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;">Off Days</h2>
-      <button class="btn btn-primary" onclick="saveOffDays()">Save Off Days</button>
-    </div>
-
-    <div class="form-section">
-      <h3>Weekly Off Days</h3>
-      <p style="color:var(--muted);font-size:12px;margin-bottom:16px;">Bot will book appointments on next available working day if lead picks an off day.</p>
-      <div class="days-grid">
-        <div class="day-btn" onclick="toggleDay(this,'Sunday')">Sun</div>
-        <div class="day-btn" onclick="toggleDay(this,'Monday')">Mon</div>
-        <div class="day-btn" onclick="toggleDay(this,'Tuesday')">Tue</div>
-        <div class="day-btn" onclick="toggleDay(this,'Wednesday')">Wed</div>
-        <div class="day-btn" onclick="toggleDay(this,'Thursday')">Thu</div>
-        <div class="day-btn" onclick="toggleDay(this,'Friday')">Fri</div>
-        <div class="day-btn" onclick="toggleDay(this,'Saturday')">Sat</div>
-      </div>
-      <p style="color:var(--muted);font-size:11px;margin-top:12px;">Selected days = OFF (bot won't book these days)</p>
-    </div>
-
-    <div class="form-section">
-      <h3>Working Hours</h3>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Start Time</label>
-          <select id="work-start">
-            <option value="8">8:00 AM</option>
-            <option value="9" selected>9:00 AM</option>
-            <option value="10">10:00 AM</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>End Time</label>
-          <select id="work-end">
-            <option value="17">5:00 PM</option>
-            <option value="18" selected>6:00 PM</option>
-            <option value="19">7:00 PM</option>
-            <option value="20">8:00 PM</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- EMBED TAB -->
-  <div class="tab" id="tab-embed">
-    <h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-bottom:24px;">Embed & Links</h2>
-
-    <div class="form-section">
-      <h3>Website Widget</h3>
-      <p style="color:var(--muted);font-size:12px;margin-bottom:12px;">Add this to your website — a "Talk to AI" button will appear.</p>
-      <div class="code-block" id="embed-code">Loading...
-        <button class="copy-btn" onclick="copyCode('embed-code')">Copy</button>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h3>Landing Page (Google Ads / Facebook)</h3>
-      <p style="color:var(--muted);font-size:12px;margin-bottom:12px;">Send ad traffic to this page — leads fill the form and bot calls them.</p>
-      <div class="code-block" id="landing-link">Loading...
-        <button class="copy-btn" onclick="copyCode('landing-link')">Copy</button>
-      </div>
-      <button class="btn btn-outline btn-sm" style="margin-top:10px;" id="preview-landing" onclick="">Preview Page</button>
-    </div>
-
-    <div class="form-section">
-      <h3>Facebook Lead Ads Webhook</h3>
-      <p style="color:var(--muted);font-size:12px;margin-bottom:12px;">Add this webhook URL to your Facebook Lead Ads setup.</p>
-      <div class="code-block" id="fb-webhook">Loading...
-        <button class="copy-btn" onclick="copyCode('fb-webhook')">Copy</button>
-      </div>
-      <p style="color:var(--muted);font-size:11px;margin-top:8px;">Verify token: <code style="color:var(--gold)">doorbotai_verify</code></p>
-    </div>
-  </div>
+</div>
 
 </div>
 
 <div id="toast"></div>
 
 <script>
-const BASE_URL = 'https://propbot-backend-oucg.onrender.com';
+const BASE_URL = 'https://doorbotai-backend-production.up.railway.app';
 const params = new URLSearchParams(window.location.search);
-const AGENT_ID = params.get('agent') || localStorage.getItem('doorbotai_agent_id');
-
-let agentData = null;
+const AGENT_ID = params.get('agent') || localStorage.getItem('doorbot_agent');
 let allLeads = [];
+let charts = {};
 
-// Greeting
+// Init
+document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', {weekday:'long',month:'long',day:'numeric'});
 const hr = new Date().getHours();
 document.getElementById('greeting-time').textContent = hr < 12 ? 'morning' : hr < 17 ? 'afternoon' : 'evening';
 
-function showTab(name) {
+function showTab(name, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  event && event.currentTarget && event.currentTarget.classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => {
-    if (n.getAttribute('onclick')?.includes(name)) n.classList.add('active');
-  });
+  if (el) el.classList.add('active');
 }
 
-function toast(msg, isError) {
+function toast(msg, type) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.style.background = isError ? 'var(--red)' : 'var(--gold)';
-  t.style.color = isError ? '#fff' : '#080808';
+  t.style.background = type === 'error' ? 'var(--red)' : type === 'info' ? 'var(--blue)' : 'var(--gold)';
+  t.style.color = type === 'error' ? '#fff' : '#080808';
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function copyCode(id) {
-  const text = document.getElementById(id).innerText.replace('Copy','').trim();
+function badgeHtml(status) {
+  const m = {hot:'badge-hot',warm:'badge-warm',cold:'badge-cold',new:'badge-new',opted_out:'badge-dnc'};
+  return `<span class="badge ${m[status]||'badge-new'}">${status||'new'}</span>`;
+}
+
+function copyText(id) {
+  const el = document.getElementById(id);
+  const text = el.childNodes[0]?.textContent?.trim() || el.textContent.replace(/copy/gi,'').trim();
   navigator.clipboard.writeText(text).then(() => toast('Copied!'));
 }
 
-function badgeHtml(status) {
-  const map = { hot: 'badge-hot', warm: 'badge-warm', cold: 'badge-cold', new: 'badge-new' };
-  return `<span class="badge ${map[status] || 'badge-new'}">${status || 'new'}</span>`;
+function copyLegal(id) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => toast('Copied!'));
+}
+
+function initCharts(stats, leads) {
+  const chartOpts = {
+    plugins: { legend: { labels: { color: '#777770', font: { size: 11, family: 'DM Sans' }, boxWidth: 10 } } },
+    maintainAspectRatio: false,
+  };
+
+  // Status chart
+  if (charts.status) charts.status.destroy();
+  charts.status = new Chart(document.getElementById('chart-status'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Hot', 'Warm', 'Cold', 'New'],
+      datasets: [{ data: [stats.hotLeads||0, stats.warmLeads||0, stats.coldLeads||0, (stats.totalLeads||0)-(stats.hotLeads||0)-(stats.warmLeads||0)-(stats.coldLeads||0)], backgroundColor: ['#4CAF7D','#C9A84C','#777770','#333'], borderWidth: 0 }]
+    },
+    options: { ...chartOpts, cutout: '65%' }
+  });
+
+  // Sources chart
+  const sourceCounts = {};
+  leads.forEach(l => { sourceCounts[l.source||'unknown'] = (sourceCounts[l.source||'unknown']||0)+1; });
+  if (charts.sources) charts.sources.destroy();
+  charts.sources = new Chart(document.getElementById('chart-sources'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(sourceCounts),
+      datasets: [{ data: Object.values(sourceCounts), backgroundColor: ['#C9A84C','#5B9BD5','#4CAF7D','#9B59B6','#E05252','#E8843A'], borderWidth: 0 }]
+    },
+    options: { ...chartOpts, cutout: '65%' }
+  });
+
+  // Outcomes chart
+  const outcomeCounts = {};
+  leads.forEach(l => { if (l.callOutcome) outcomeCounts[l.callOutcome.replace(/_/g,' ')] = (outcomeCounts[l.callOutcome.replace(/_/g,' ')]||0)+1; });
+  if (charts.outcomes) charts.outcomes.destroy();
+  charts.outcomes = new Chart(document.getElementById('chart-outcomes'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(outcomeCounts),
+      datasets: [{ data: Object.values(outcomeCounts), backgroundColor: '#C9A84C', borderRadius: 2 }]
+    },
+    options: { ...chartOpts, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#777770', font: { size: 9 } }, grid: { display: false } }, y: { ticks: { color: '#777770', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.04)' } } } }
+  });
 }
 
 function renderLeads(leads, tbodyId, cols) {
   const tbody = document.getElementById(tbodyId);
-  if (!leads.length) {
-    tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center;color:var(--muted);padding:32px;">No leads yet</td></tr>`;
-    return;
-  }
+  if (!leads.length) { tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center;color:var(--muted);padding:24px;">No leads yet</td></tr>`; return; }
   if (tbodyId === 'recent-leads') {
-    tbody.innerHTML = leads.slice(0, 8).map(l => `<tr>
-      <td style="font-weight:400">${l.name || '—'}</td>
-      <td style="color:var(--muted)">${l.phone || '—'}</td>
-      <td style="color:var(--gold)">${l.budget || '—'}</td>
-      <td>${l.city || '—'}</td>
+    tbody.innerHTML = leads.slice(0,8).map(l => `<tr>
+      <td>${l.name||'—'}</td><td style="color:var(--muted);font-family:monospace;">${l.phone||'—'}</td>
+      <td style="color:var(--gold)">${l.budget||'—'}</td><td>${l.city||'—'}</td>
       <td>${badgeHtml(l.status)}</td>
-      <td style="color:var(--muted);font-size:11px;">${l.callReason || '—'}</td>
-      <td style="color:var(--muted);font-size:11px;">${l.createdAt ? new Date(l.createdAt).toLocaleDateString() : '—'}</td>
+      <td style="color:var(--muted);font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.callReason||'—'}</td>
+      <td>${l.dncChecked ? '<span style="color:var(--green);font-size:10px;">✅ Clear</span>' : '<span style="color:var(--muted);font-size:10px;">—</span>'}</td>
+      <td style="color:var(--muted);font-size:11px;">${l.createdAt?new Date(l.createdAt).toLocaleDateString():'—'}</td>
     </tr>`).join('');
   } else {
     tbody.innerHTML = leads.map(l => `<tr>
-      <td>${l.name || '—'}</td>
-      <td style="color:var(--muted)">${l.phone || '—'}</td>
-      <td style="color:var(--muted)">${l.email || '—'}</td>
-      <td style="color:var(--gold)">${l.budget || '—'}</td>
-      <td>${l.city || '—'}</td>
+      <td>${l.name||'—'}</td>
+      <td style="font-family:monospace;font-size:11px">${l.phone||'—'}</td>
+      <td style="color:var(--muted)">${l.email||'—'}</td>
+      <td style="color:var(--gold)">${l.budget||'—'}</td>
+      <td>${l.city||'—'}</td>
       <td>${badgeHtml(l.status)}</td>
-      <td style="font-size:11px">${l.callOutcome?.replace(/_/g,' ') || '—'}</td>
-      <td style="color:var(--muted);font-size:11px;max-width:200px;">${l.callReason || '—'}</td>
-      <td style="font-size:11px">${l.source || '—'}</td>
-      <td style="color:var(--muted);font-size:11px;">${l.createdAt ? new Date(l.createdAt).toLocaleDateString() : '—'}</td>
+      <td style="font-size:11px">${(l.callOutcome||'—').replace(/_/g,' ')}</td>
+      <td style="color:var(--muted);font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${l.callReason||'—'}</td>
+      <td>${l.dncChecked ? '<span style="color:var(--green);font-size:10px;">✅</span>' : '—'}</td>
+      <td style="font-size:11px">${l.source||'—'}</td>
+      <td style="color:var(--muted);font-size:11px;">${l.createdAt?new Date(l.createdAt).toLocaleDateString():'—'}</td>
     </tr>`).join('');
   }
 }
@@ -506,118 +644,129 @@ function renderLeads(leads, tbodyId, cols) {
 function filterLeads() {
   const status = document.getElementById('filter-status').value;
   const source = document.getElementById('filter-source').value;
-  let filtered = allLeads;
-  if (status) filtered = filtered.filter(l => l.status === status);
-  if (source) filtered = filtered.filter(l => l.source === source);
-  renderLeads(filtered, 'all-leads', 10);
+  let f = allLeads;
+  if (status) f = f.filter(l => l.status === status);
+  if (source) f = f.filter(l => l.source === source);
+  renderLeads(f, 'all-leads', 11);
 }
 
 async function loadDashboard() {
   if (!AGENT_ID) {
-    document.getElementById('stat-total').textContent = '—';
     document.getElementById('sb-name').textContent = 'No Agent ID';
-    document.getElementById('sb-id').textContent = 'Add ?agent=ID to URL';
+    document.getElementById('sb-plan').textContent = 'Add ?agent=ID to URL';
     return;
   }
-
   try {
     const res = await fetch(`${BASE_URL}/api/dashboard/${AGENT_ID}`);
     const data = await res.json();
     if (!data.success) throw new Error(data.error);
 
-    agentData = data.agent;
+    const agent = data.agent;
     allLeads = data.leads || [];
+    const stats = data.stats || {};
 
     // Sidebar
-    document.getElementById('sb-name').textContent = agentData.agentName;
-    document.getElementById('sb-id').textContent = `ID: ${AGENT_ID}`;
-    document.getElementById('greeting-name').textContent = agentData.agentName.split(' ')[0];
+    document.getElementById('sb-name').textContent = agent.agentName;
+    document.getElementById('sb-plan').textContent = agent.plan || 'starter';
+    document.getElementById('greeting-name').textContent = agent.agentName.split(' ')[0];
 
     // Stats
-    const s = data.stats || {};
-    document.getElementById('stat-total').textContent = s.totalLeads || '0';
-    document.getElementById('stat-hot').textContent = s.hotLeads || '0';
-    document.getElementById('stat-appts').textContent = s.appointmentsBooked || '0';
-    document.getElementById('stat-conv').textContent = s.conversionRate || '0%';
+    document.getElementById('stat-total').textContent = stats.totalLeads || '0';
+    document.getElementById('stat-hot').textContent = stats.hotLeads || '0';
+    document.getElementById('stat-appts').textContent = stats.appointmentsBooked || '0';
+    document.getElementById('stat-conv').textContent = stats.conversionRate || '0%';
+
+    // Progress bars
+    const total = stats.totalLeads || 1;
+    document.getElementById('prog-total').style.width = '100%';
+    document.getElementById('prog-hot').style.width = Math.min(100, ((stats.hotLeads||0)/total)*100) + '%';
+    document.getElementById('prog-appts').style.width = Math.min(100, ((stats.appointmentsBooked||0)/total)*100) + '%';
+    document.getElementById('prog-conv').style.width = Math.min(100, parseFloat(stats.conversionRate||'0')) + '%';
+
+    // Charts
+    initCharts(stats, allLeads);
 
     // Leads
-    renderLeads(allLeads, 'recent-leads', 7);
-    renderLeads(allLeads, 'all-leads', 10);
+    renderLeads(allLeads, 'recent-leads', 8);
+    renderLeads(allLeads, 'all-leads', 11);
 
-    // Training fields
-    const f = ['botName','city','propertyTypes','priceRange','tone','language','calendlyLink','notificationEmail','about','faqs','situationalScripts','objectionHandling'];
-    f.forEach(k => {
-      const el = document.getElementById('t-' + k);
-      if (el && agentData[k]) el.value = agentData[k];
+    // Training
+    ['botName','city','propertyTypes','priceRange','tone','language','calendlyLink','notificationEmail','about','faqs','situationalScripts','objectionHandling'].forEach(k => {
+      const el = document.getElementById('t-'+k);
+      if (el && agent[k]) el.value = agent[k];
     });
 
     // Off days
-    if (agentData.offDays?.length) {
-      document.querySelectorAll('.day-btn').forEach(btn => {
-        if (agentData.offDays.includes(btn.textContent.trim() === 'Sun' ? 'Sunday' :
-          btn.textContent.trim() === 'Mon' ? 'Monday' :
-          btn.textContent.trim() === 'Tue' ? 'Tuesday' :
-          btn.textContent.trim() === 'Wed' ? 'Wednesday' :
-          btn.textContent.trim() === 'Thu' ? 'Thursday' :
-          btn.textContent.trim() === 'Fri' ? 'Friday' : 'Saturday')) {
-          btn.classList.add('selected');
-        }
+    const dayMap = {'Sun':'Sunday','Mon':'Monday','Tue':'Tuesday','Wed':'Wednesday','Thu':'Thursday','Fri':'Friday','Sat':'Saturday'};
+    if (agent.offDays?.length) {
+      document.querySelectorAll('.day-btn').forEach(b => {
+        if (agent.offDays.includes(dayMap[b.textContent.trim()])) b.classList.add('selected');
       });
     }
 
     // Embed codes
-    const embedCode = `<script src="${BASE_URL}/widget.js" data-agent="${AGENT_ID}" defer><\/script>`;
-    const landingPage = `${BASE_URL}/agent/${AGENT_ID}`;
-    const fbWebhook = `${BASE_URL}/webhook/facebook/${AGENT_ID}`;
-    document.getElementById('embed-code').childNodes[0].textContent = embedCode + '\n';
-    document.getElementById('landing-link').childNodes[0].textContent = landingPage + '\n';
-    document.getElementById('fb-webhook').childNodes[0].textContent = fbWebhook + '\n';
-    document.getElementById('preview-landing').onclick = () => window.open(landingPage, '_blank');
+    const base = BASE_URL;
+    const lp = `${base}/agent/${AGENT_ID}`;
+    const ec = `<script src="${base}/widget.js" data-agent="${AGENT_ID}" defer><\/script>`;
+    const fbw = `${base}/webhook/facebook/${AGENT_ID}`;
 
-    // Save agent id
-    localStorage.setItem('doorbotai_agent_id', AGENT_ID);
+    document.getElementById('landing-link').childNodes[0].textContent = lp + '\n';
+    document.getElementById('fb-webhook').childNodes[0].textContent = fbw + '\n';
+    document.getElementById('embed-code').childNodes[0].textContent = ec + '\n';
+    document.getElementById('embed-landing').childNodes[0].textContent = lp + '\n';
+    document.getElementById('agent-id-display').childNodes[0].textContent = AGENT_ID + '\n';
+    document.getElementById('preview-btn').onclick = () => window.open(lp, '_blank');
+
+    // Legal texts
+    document.getElementById('csv-disclaimer-text').textContent = `By uploading leads, you confirm ALL contacts have given prior express written consent per TCPA (USA) and CASL (Canada) requirements. You are the caller of record. DoorBot AI is not liable for compliance violations. Fines: $500-$1,500 per call.`;
+
+    document.getElementById('tos-text').textContent = `DOORBOTAI TERMS OF SERVICE — March 2026\n\nYou are solely responsible for TCPA/CASL compliance.\nDoorBot AI is a software provider only.\nAll contacts must have given express written consent.\nViolations: $500-$1,500 per call fine.\nDoorBot AI is not liable for your regulatory violations.\n\nBy using DoorBot AI, you accept these terms.`;
+
+    document.getElementById('pp-text').textContent = `DOORBOTAI PRIVACY POLICY — March 2026\n\nWe collect: account info, bot config, lead data, call logs.\nWe do NOT sell your data.\nData encrypted in transit and at rest.\nRetention: leads 12 months, call logs 90 days.\nYour rights: access, delete, export your data.\n\nContact: privacy@doorbotai.com`;
+
+    localStorage.setItem('doorbot_agent', AGENT_ID);
   } catch (err) {
     console.error('Dashboard error:', err);
-    document.getElementById('recent-leads').innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:32px;">Error: ${err.message}</td></tr>`;
+    toast('Error loading dashboard: ' + err.message, 'error');
   }
 }
 
 async function saveTraining() {
-  if (!AGENT_ID) return toast('No agent ID', true);
+  if (!AGENT_ID) return toast('No agent ID', 'error');
   const data = {};
   ['botName','city','propertyTypes','priceRange','tone','language','calendlyLink','notificationEmail','about','faqs','situationalScripts','objectionHandling'].forEach(k => {
-    const el = document.getElementById('t-' + k);
+    const el = document.getElementById('t-'+k);
     if (el) data[k] = el.value;
   });
   try {
     const res = await fetch(`${BASE_URL}/api/train/${AGENT_ID}`, {
       method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
     });
-    const result = await res.json();
-    if (result.success) toast('Bot updated! Changes are live instantly.');
-    else toast('Error: ' + result.error, true);
-  } catch (err) { toast('Error saving', true); }
+    const r = await res.json();
+    r.success ? toast('Bot updated! Live instantly.') : toast('Error: ' + r.error, 'error');
+  } catch (err) { toast('Error saving', 'error'); }
 }
 
-function toggleDay(btn, day) {
-  btn.classList.toggle('selected');
-}
+function toggleDay(btn) { btn.classList.toggle('selected'); }
 
 async function saveOffDays() {
-  if (!AGENT_ID) return;
   const dayMap = {'Sun':'Sunday','Mon':'Monday','Tue':'Tuesday','Wed':'Wednesday','Thu':'Thursday','Fri':'Friday','Sat':'Saturday'};
   const offDays = [];
   document.querySelectorAll('.day-btn.selected').forEach(b => offDays.push(dayMap[b.textContent.trim()]));
   try {
     await fetch(`${BASE_URL}/api/train/${AGENT_ID}`, {
-      method: 'PUT', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ offDays })
+      method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ offDays })
     });
-    toast('Off days saved!');
-  } catch(err) { toast('Error', true); }
+    toast('Schedule saved!');
+  } catch { toast('Error', 'error'); }
 }
 
 async function uploadCSV(input) {
+  if (!document.getElementById('csv-consent').checked) {
+    toast('Please confirm TCPA consent checkbox first!', 'error');
+    input.value = '';
+    return;
+  }
   const file = input.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -627,39 +776,68 @@ async function uploadCSV(input) {
     const leads = lines.slice(1).map(line => {
       const vals = line.split(',');
       const lead = {};
-      headers.forEach((h, i) => lead[h] = (vals[i] || '').trim());
+      headers.forEach((h, i) => lead[h] = (vals[i]||'').trim());
       return lead;
     }).filter(l => l.phone);
-
-    document.getElementById('csv-result').textContent = `Processing ${leads.length} leads...`;
+    document.getElementById('csv-result').textContent = `Processing ${leads.length} leads with DNC check...`;
     try {
       const res = await fetch(`${BASE_URL}/api/leads/upload/${AGENT_ID}`, {
         method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ leads })
       });
       const data = await res.json();
-      document.getElementById('csv-result').textContent = `Done! ${data.processed} processed, ${data.called} calls made.`;
+      document.getElementById('csv-result').textContent = `✅ Done! ${data.processed} processed, ${data.called} calls made, ${data.dncBlocked||0} blocked by DNC.`;
       toast(`${data.processed} leads uploaded!`);
-    } catch(err) {
-      document.getElementById('csv-result').textContent = 'Error uploading.';
-    }
+    } catch { document.getElementById('csv-result').textContent = 'Error uploading.'; }
   };
   reader.readAsText(file);
 }
 
-async function startScraper() {
-  if (!AGENT_ID) return;
-  document.getElementById('scraper-result').textContent = 'Starting scraper...';
+async function findFSBO() {
+  document.getElementById('mode3-result').textContent = 'Finding FSBO leads...';
   try {
-    const res = await fetch(`${BASE_URL}/api/scrape/${AGENT_ID}`, { method: 'POST' });
+    const res = await fetch(`${BASE_URL}/api/fsbo/${AGENT_ID}`, { method: 'POST' });
     const data = await res.json();
-    document.getElementById('scraper-result').textContent = data.message || 'Scraper started!';
-    toast('Scraper started! Check leads in 2 minutes.');
-  } catch(err) {
-    document.getElementById('scraper-result').textContent = 'Error starting scraper.';
-  }
+    document.getElementById('mode3-result').textContent = data.message || 'FSBO search started! Check leads in 2 minutes.';
+    toast('FSBO search started!');
+  } catch { document.getElementById('mode3-result').textContent = 'Error starting FSBO search.'; }
 }
 
-// Init
+async function uploadExpired(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('mode3-result').textContent = 'Uploading expired listings...';
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const lines = e.target.result.trim().split('\n');
+    const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+    const leads = lines.slice(1).map(line => {
+      const vals = line.split(',');
+      const lead = {};
+      headers.forEach((h,i) => lead[h] = (vals[i]||'').trim());
+      return lead;
+    }).filter(l => l.phone);
+    try {
+      const res = await fetch(`${BASE_URL}/api/leads/upload/${AGENT_ID}`, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ leads: leads.map(l => ({...l, source: 'expired_listing'})) })
+      });
+      const data = await res.json();
+      document.getElementById('mode3-result').textContent = `✅ ${data.processed} expired listings uploaded, ${data.called} calls made.`;
+    } catch { document.getElementById('mode3-result').textContent = 'Error.'; }
+  };
+  reader.readAsText(file);
+}
+
+function getResearchURLs() {
+  const city = document.getElementById('t-city')?.value || 'your city';
+  const urls = [
+    `https://www.realtor.com/realestateandhomes-search/${city.replace(/[\s,]+/g,'-')}/type-single_family/listing-type-by_owner`,
+    `https://www.zillow.com/homes/for_sale/?searchQueryState={"isForSaleByOwner":true}`,
+    `https://www.google.com/search?q=site:facebook.com/groups+"looking+to+buy+home"+${encodeURIComponent(city)}`
+  ];
+  document.getElementById('mode3-result').innerHTML = `Research URLs for ${city}:<br>` + urls.map(u => `<a href="${u}" target="_blank" style="color:var(--gold);font-size:10px;display:block;margin-top:4px;">${u.substring(0,60)}...</a>`).join('');
+}
+
 loadDashboard();
 </script>
 </body>
