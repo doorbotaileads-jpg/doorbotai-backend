@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DoorBot AI — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --gold:#C9A84C;--gold-light:#E8C97A;--bg:#080808;--bg2:#0F0F0F;--bg3:#161616;
+  --border:rgba(201,168,76,0.15);--text:#F0EDE8;--muted:#777770;--red:#E05252;--green:#4CAF7D;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-height:100vh;}
+/* Layout */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;}
+.main{margin-left:220px;padding:32px;min-height:100vh;}
+/* Sidebar */
+.logo{padding:24px 20px;border-bottom:1px solid var(--border);}
+.logo h1{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--gold);font-weight:500;}
+.logo p{font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;}
+.nav{padding:16px 0;flex:1;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;color:var(--muted);cursor:pointer;transition:all 0.15s;border-left:2px solid transparent;}
+.nav-item:hover{color:var(--text);background:rgba(201,168,76,0.05);}
+.nav-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(201,168,76,0.08);}
+.nav-icon{width:16px;height:16px;opacity:0.7;}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
+.agent-badge{background:rgba(201,168,76,0.1);border:1px solid var(--border);padding:8px 12px;border-radius:4px;}
+.agent-badge .name{font-size:12px;color:var(--text);font-weight:500;}
+.agent-badge .id{font-size:10px;color:var(--muted);margin-top:2px;}
+/* Tabs */
+.tab{display:none;}
+.tab.active{display:block;}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.stat-card{background:var(--bg2);border:1px solid var(--border);padding:20px;position:relative;overflow:hidden;}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold);opacity:0.4;}
+.stat-label{font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.stat-value{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--text);font-weight:300;}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+/* Section headers */
+.section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:400;color:var(--text);}
+/* Buttons */
+.btn{padding:8px 16px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;border:none;}
+.btn-primary{background:var(--gold);color:#080808;}
+.btn-primary:hover{background:var(--gold-light);}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold);}
+.btn-sm{padding:5px 12px;font-size:11px;}
+/* Tables */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);font-weight:400;}
+td{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:13px;color:var(--text);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(201,168,76,0.03);}
+/* Badges */
+.badge{display:inline-block;padding:2px 8px;font-size:10px;letter-spacing:0.06em;text-transform:uppercase;font-weight:500;}
+.badge-hot{background:rgba(76,175,125,0.15);color:#4CAF7D;border:1px solid rgba(76,175,125,0.3);}
+.badge-warm{background:rgba(201,168,76,0.15);color:var(--gold);border:1px solid rgba(201,168,76,0.3);}
+.badge-cold{background:rgba(119,119,112,0.15);color:var(--muted);border:1px solid rgba(119,119,112,0.3);}
+.badge-new{background:rgba(255,255,255,0.08);color:var(--text);border:1px solid rgba(255,255,255,0.12);}
+/* Forms */
+.form-section{background:var(--bg2);border:1px solid var(--border);padding:24px;margin-bottom:20px;}
+.form-section h3{font-family:'Cormorant Garamond',serif;font-size:16px;color:var(--gold);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);}
+input,select,textarea{background:#0A0A0A;border:1px solid var(--border);color:var(--text);padding:10px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);}
+textarea{resize:vertical;min-height:80px;}
+select option{background:#0A0A0A;}
+/* Off days */
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:8px;}
+.day-btn{padding:8px 4px;text-align:center;font-size:11px;cursor:pointer;background:#0A0A0A;border:1px solid var(--border);color:var(--muted);transition:all 0.15s;}
+.day-btn.selected{background:rgba(201,168,76,0.15);border-color:var(--gold);color:var(--gold);}
+/* Source cards */
+.source-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.source-card{background:var(--bg2);border:1px solid var(--border);padding:20px;cursor:pointer;transition:border-color 0.2s;}
+.source-card:hover{border-color:var(--gold);}
+.source-card h4{font-size:13px;font-weight:500;margin-bottom:6px;}
+.source-card p{font-size:11px;color:var(--muted);line-height:1.6;}
+.source-card .source-icon{font-size:20px;margin-bottom:10px;}
+/* Code block */
+.code-block{background:#0A0A0A;border:1px solid var(--border);padding:14px;font-family:monospace;font-size:12px;color:var(--gold);word-break:break-all;position:relative;}
+.copy-btn{position:absolute;top:8px;right:8px;background:var(--border);border:none;color:var(--muted);padding:4px 10px;font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.copy-btn:hover{background:var(--gold);color:#080808;}
+/* Upload zone */
+.upload-zone{border:2px dashed var(--border);padding:40px;text-align:center;cursor:pointer;transition:border-color 0.2s;}
+.upload-zone:hover{border-color:var(--gold);}
+.upload-zone p{color:var(--muted);font-size:13px;margin-top:8px;}
+/* Toast */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--gold);color:#080808;padding:12px 20px;font-size:13px;font-weight:500;transform:translateY(80px);transition:transform 0.3s;z-index:999;}
+#toast.show{transform:translateY(0);}
+/* Loading */
+.loader{text-align:center;padding:60px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <h1>DoorBot AI</h1>
+    <p>We open the door</p>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="showTab('overview')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      Overview
+    </div>
+    <div class="nav-item" onclick="showTab('leads')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      Leads
+    </div>
+    <div class="nav-item" onclick="showTab('sources')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      Lead Sources
+    </div>
+    <div class="nav-item" onclick="showTab('training')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+      Train Bot
+    </div>
+    <div class="nav-item" onclick="showTab('offdays')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+      Off Days
+    </div>
+    <div class="nav-item" onclick="showTab('embed')">
+      <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+      Embed & Links
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="agent-badge">
+      <div class="name" id="sb-name">Loading...</div>
+      <div class="id" id="sb-id">—</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- OVERVIEW TAB -->
+  <div class="tab active" id="tab-overview">
+    <div class="section-head" style="margin-bottom:24px;">
+      <div>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;">Good <span id="greeting-time">morning</span>, <span id="greeting-name">Agent</span></h2>
+        <p style="color:var(--muted);font-size:13px;margin-top:4px;">Here's your DoorBot AI summary</p>
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="loadDashboard()">↻ Refresh</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Leads</div>
+        <div class="stat-value" id="stat-total">—</div>
+        <div class="stat-sub">All time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Hot Leads</div>
+        <div class="stat-value" id="stat-hot" style="color:var(--green)">—</div>
+        <div class="stat-sub">Appointment booked</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Appointments</div>
+        <div class="stat-value" id="stat-appts">—</div>
+        <div class="stat-sub">Booked by bot</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Conversion</div>
+        <div class="stat-value" id="stat-conv" style="color:var(--gold)">—</div>
+        <div class="stat-sub">Lead to appointment</div>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <div class="section-title">Recent Leads</div>
+      <button class="btn btn-outline btn-sm" onclick="showTab('leads')">View All</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Name</th><th>Phone</th><th>Budget</th><th>City</th><th>Status</th><th>Reason</th><th>Date</th>
+        </tr></thead>
+        <tbody id="recent-leads">
+          <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:32px;">Loading leads...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- LEADS TAB -->
+  <div class="tab" id="tab-leads">
+    <div class="section-head" style="margin-bottom:24px;">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;">All Leads</h2>
+      <div style="display:flex;gap:8px;">
+        <select id="filter-status" onchange="filterLeads()" style="padding:6px 10px;font-size:12px;width:140px;">
+          <option value="">All Status</option>
+          <option value="hot">Hot</option>
+          <option value="warm">Warm</option>
+          <option value="cold">Cold</option>
+          <option value="new">New</option>
+        </select>
+        <select id="filter-source" onchange="filterLeads()" style="padding:6px 10px;font-size:12px;width:160px;">
+          <option value="">All Sources</option>
+          <option value="landing_page">Landing Page</option>
+          <option value="facebook_ads">Facebook Ads</option>
+          <option value="csv_upload">CSV Upload</option>
+          <option value="email_click">Email Click</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>Name</th><th>Phone</th><th>Email</th><th>Budget</th><th>City</th><th>Status</th><th>Call Outcome</th><th>Reason</th><th>Source</th><th>Date</th>
+        </tr></thead>
+        <tbody id="all-leads">
+          <tr><td colspan="10" style="text-align:center;color:var(--muted);padding:32px;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SOURCES TAB -->
+  <div class="tab" id="tab-sources">
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-bottom:24px;">Lead Sources</h2>
+
+    <div class="source-grid">
+      <div class="source-card" onclick="showTab('embed')">
+        <div class="source-icon">🌐</div>
+        <h4>Website Widget</h4>
+        <p>Add a "Talk to AI" button to your website. Buyers click → bot calls them.</p>
+      </div>
+      <div class="source-card" onclick="showTab('embed')">
+        <div class="source-icon">📢</div>
+        <h4>Google / Facebook Ads</h4>
+        <p>Send ad traffic to your dedicated landing page. Bot calls leads instantly.</p>
+      </div>
+      <div class="source-card" onclick="showTab('leads')">
+        <div class="source-icon">📋</div>
+        <h4>CSV Upload</h4>
+        <p>Upload existing leads. Bot reactivates them with personalized calls.</p>
+      </div>
+    </div>
+
+    <!-- CSV Upload -->
+    <div class="form-section">
+      <h3>Mode 2 — Upload Existing Leads</h3>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:16px;">CSV format: name, phone, email, budget, city (headers required)</p>
+      <div class="upload-zone" onclick="document.getElementById('csv-file').click()">
+        <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:var(--muted);margin:0 auto;display:block;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+        <p>Click to upload CSV file</p>
+        <p style="font-size:11px;margin-top:4px;">Bot will call each lead automatically</p>
+      </div>
+      <input type="file" id="csv-file" accept=".csv" style="display:none;" onchange="uploadCSV(this)"/>
+      <div id="csv-result" style="margin-top:12px;font-size:12px;color:var(--muted);"></div>
+    </div>
+
+    <!-- Mode 3 Scraper -->
+    <div class="form-section">
+      <h3>Mode 3 — Auto Lead Scraper</h3>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:16px;">Bot will scrape Craigslist for leads in your city and call them automatically.</p>
+      <button class="btn btn-primary" onclick="startScraper()">Start Auto Scraper</button>
+      <div id="scraper-result" style="margin-top:12px;font-size:12px;color:var(--muted);"></div>
+    </div>
+  </div>
+
+  <!-- TRAINING TAB -->
+  <div class="tab" id="tab-training">
+    <div class="section-head" style="margin-bottom:24px;">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;">Train Your Bot</h2>
+      <button class="btn btn-primary" onclick="saveTraining()">Save Changes</button>
+    </div>
+
+    <div class="form-section">
+      <h3>Bot Identity</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Bot Name (buyers will hear this)</label>
+          <input type="text" id="t-botName" placeholder="e.g. James AI, Miami Home Finder"/>
+        </div>
+        <div class="form-group">
+          <label>Your City / Market</label>
+          <input type="text" id="t-city" placeholder="e.g. Miami, FL"/>
+        </div>
+        <div class="form-group">
+          <label>Property Types</label>
+          <input type="text" id="t-propertyTypes" placeholder="Single Family, Condos, Townhomes"/>
+        </div>
+        <div class="form-group">
+          <label>Price Range</label>
+          <input type="text" id="t-priceRange" placeholder="$300K – $1.5M"/>
+        </div>
+        <div class="form-group">
+          <label>Tone</label>
+          <select id="t-tone">
+            <option>Friendly & Approachable</option>
+            <option>Professional & Formal</option>
+            <option>Luxury & Exclusive</option>
+            <option>Direct & No-nonsense</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Language</label>
+          <select id="t-language">
+            <option>English</option>
+            <option>Spanish</option>
+            <option>French (Canada)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Calendly Link</label>
+          <input type="text" id="t-calendlyLink" placeholder="https://calendly.com/yourusername"/>
+        </div>
+        <div class="form-group">
+          <label>Notification Email</label>
+          <input type="email" id="t-notificationEmail" placeholder="your@email.com"/>
+        </div>
+        <div class="form-group full">
+          <label>About You (optional — bot will mention this)</label>
+          <textarea id="t-about" placeholder="e.g. I have 10 years experience in Miami luxury real estate..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>FAQs & Scripts</h3>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label>Common FAQs (format: Q: ... A: ...)</label>
+          <textarea id="t-faqs" rows="5" placeholder="Q: Do you work with first time buyers? A: Absolutely! I love helping first time buyers...
+Q: What areas do you cover? A: I specialize in Miami, Coral Gables, and Brickell..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Situational Scripts</label>
+          <textarea id="t-situationalScripts" rows="5" placeholder="First time buyer: Focus on affordability, explain the buying process step by step...
+Investor: Emphasize ROI, rental yields, appreciation rates...
+Seller: Mention your marketing strategy, comparable sales..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Objection Handling</label>
+          <textarea id="t-objectionHandling" rows="4" placeholder="Too expensive: I understand your concern. Let me show you some great options in your budget...
+Already have an agent: I respect that! If anything changes, I'm here to help...
+Not ready yet: Totally fine! Can I send you listings to keep you informed?"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFF DAYS TAB -->
+  <div class="tab" id="tab-offdays">
+    <div class="section-head" style="margin-bottom:24px;">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;">Off Days</h2>
+      <button class="btn btn-primary" onclick="saveOffDays()">Save Off Days</button>
+    </div>
+
+    <div class="form-section">
+      <h3>Weekly Off Days</h3>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:16px;">Bot will book appointments on next available working day if lead picks an off day.</p>
+      <div class="days-grid">
+        <div class="day-btn" onclick="toggleDay(this,'Sunday')">Sun</div>
+        <div class="day-btn" onclick="toggleDay(this,'Monday')">Mon</div>
+        <div class="day-btn" onclick="toggleDay(this,'Tuesday')">Tue</div>
+        <div class="day-btn" onclick="toggleDay(this,'Wednesday')">Wed</div>
+        <div class="day-btn" onclick="toggleDay(this,'Thursday')">Thu</div>
+        <div class="day-btn" onclick="toggleDay(this,'Friday')">Fri</div>
+        <div class="day-btn" onclick="toggleDay(this,'Saturday')">Sat</div>
+      </div>
+      <p style="color:var(--muted);font-size:11px;margin-top:12px;">Selected days = OFF (bot won't book these days)</p>
+    </div>
+
+    <div class="form-section">
+      <h3>Working Hours</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Start Time</label>
+          <select id="work-start">
+            <option value="8">8:00 AM</option>
+            <option value="9" selected>9:00 AM</option>
+            <option value="10">10:00 AM</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>End Time</label>
+          <select id="work-end">
+            <option value="17">5:00 PM</option>
+            <option value="18" selected>6:00 PM</option>
+            <option value="19">7:00 PM</option>
+            <option value="20">8:00 PM</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMBED TAB -->
+  <div class="tab" id="tab-embed">
+    <h2 style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;margin-bottom:24px;">Embed & Links</h2>
+
+    <div class="form-section">
+      <h3>Website Widget</h3>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:12px;">Add this to your website — a "Talk to AI" button will appear.</p>
+      <div class="code-block" id="embed-code">Loading...
+        <button class="copy-btn" onclick="copyCode('embed-code')">Copy</button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>Landing Page (Google Ads / Facebook)</h3>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:12px;">Send ad traffic to this page — leads fill the form and bot calls them.</p>
+      <div class="code-block" id="landing-link">Loading...
+        <button class="copy-btn" onclick="copyCode('landing-link')">Copy</button>
+      </div>
+      <button class="btn btn-outline btn-sm" style="margin-top:10px;" id="preview-landing" onclick="">Preview Page</button>
+    </div>
+
+    <div class="form-section">
+      <h3>Facebook Lead Ads Webhook</h3>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:12px;">Add this webhook URL to your Facebook Lead Ads setup.</p>
+      <div class="code-block" id="fb-webhook">Loading...
+        <button class="copy-btn" onclick="copyCode('fb-webhook')">Copy</button>
+      </div>
+      <p style="color:var(--muted);font-size:11px;margin-top:8px;">Verify token: <code style="color:var(--gold)">doorbotai_verify</code></p>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+const BASE_URL = 'https://propbot-backend-oucg.onrender.com';
+const params = new URLSearchParams(window.location.search);
+const AGENT_ID = params.get('agent') || localStorage.getItem('doorbotai_agent_id');
+
+let agentData = null;
+let allLeads = [];
+
+// Greeting
+const hr = new Date().getHours();
+document.getElementById('greeting-time').textContent = hr < 12 ? 'morning' : hr < 17 ? 'afternoon' : 'evening';
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event && event.currentTarget && event.currentTarget.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(name)) n.classList.add('active');
+  });
+}
+
+function toast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = isError ? 'var(--red)' : 'var(--gold)';
+  t.style.color = isError ? '#fff' : '#080808';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function copyCode(id) {
+  const text = document.getElementById(id).innerText.replace('Copy','').trim();
+  navigator.clipboard.writeText(text).then(() => toast('Copied!'));
+}
+
+function badgeHtml(status) {
+  const map = { hot: 'badge-hot', warm: 'badge-warm', cold: 'badge-cold', new: 'badge-new' };
+  return `<span class="badge ${map[status] || 'badge-new'}">${status || 'new'}</span>`;
+}
+
+function renderLeads(leads, tbodyId, cols) {
+  const tbody = document.getElementById(tbodyId);
+  if (!leads.length) {
+    tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center;color:var(--muted);padding:32px;">No leads yet</td></tr>`;
+    return;
+  }
+  if (tbodyId === 'recent-leads') {
+    tbody.innerHTML = leads.slice(0, 8).map(l => `<tr>
+      <td style="font-weight:400">${l.name || '—'}</td>
+      <td style="color:var(--muted)">${l.phone || '—'}</td>
+      <td style="color:var(--gold)">${l.budget || '—'}</td>
+      <td>${l.city || '—'}</td>
+      <td>${badgeHtml(l.status)}</td>
+      <td style="color:var(--muted);font-size:11px;">${l.callReason || '—'}</td>
+      <td style="color:var(--muted);font-size:11px;">${l.createdAt ? new Date(l.createdAt).toLocaleDateString() : '—'}</td>
+    </tr>`).join('');
+  } else {
+    tbody.innerHTML = leads.map(l => `<tr>
+      <td>${l.name || '—'}</td>
+      <td style="color:var(--muted)">${l.phone || '—'}</td>
+      <td style="color:var(--muted)">${l.email || '—'}</td>
+      <td style="color:var(--gold)">${l.budget || '—'}</td>
+      <td>${l.city || '—'}</td>
+      <td>${badgeHtml(l.status)}</td>
+      <td style="font-size:11px">${l.callOutcome?.replace(/_/g,' ') || '—'}</td>
+      <td style="color:var(--muted);font-size:11px;max-width:200px;">${l.callReason || '—'}</td>
+      <td style="font-size:11px">${l.source || '—'}</td>
+      <td style="color:var(--muted);font-size:11px;">${l.createdAt ? new Date(l.createdAt).toLocaleDateString() : '—'}</td>
+    </tr>`).join('');
+  }
+}
+
+function filterLeads() {
+  const status = document.getElementById('filter-status').value;
+  const source = document.getElementById('filter-source').value;
+  let filtered = allLeads;
+  if (status) filtered = filtered.filter(l => l.status === status);
+  if (source) filtered = filtered.filter(l => l.source === source);
+  renderLeads(filtered, 'all-leads', 10);
+}
+
+async function loadDashboard() {
+  if (!AGENT_ID) {
+    document.getElementById('stat-total').textContent = '—';
+    document.getElementById('sb-name').textContent = 'No Agent ID';
+    document.getElementById('sb-id').textContent = 'Add ?agent=ID to URL';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${BASE_URL}/api/dashboard/${AGENT_ID}`);
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    agentData = data.agent;
+    allLeads = data.leads || [];
+
+    // Sidebar
+    document.getElementById('sb-name').textContent = agentData.agentName;
+    document.getElementById('sb-id').textContent = `ID: ${AGENT_ID}`;
+    document.getElementById('greeting-name').textContent = agentData.agentName.split(' ')[0];
+
+    // Stats
+    const s = data.stats || {};
+    document.getElementById('stat-total').textContent = s.totalLeads || '0';
+    document.getElementById('stat-hot').textContent = s.hotLeads || '0';
+    document.getElementById('stat-appts').textContent = s.appointmentsBooked || '0';
+    document.getElementById('stat-conv').textContent = s.conversionRate || '0%';
+
+    // Leads
+    renderLeads(allLeads, 'recent-leads', 7);
+    renderLeads(allLeads, 'all-leads', 10);
+
+    // Training fields
+    const f = ['botName','city','propertyTypes','priceRange','tone','language','calendlyLink','notificationEmail','about','faqs','situationalScripts','objectionHandling'];
+    f.forEach(k => {
+      const el = document.getElementById('t-' + k);
+      if (el && agentData[k]) el.value = agentData[k];
+    });
+
+    // Off days
+    if (agentData.offDays?.length) {
+      document.querySelectorAll('.day-btn').forEach(btn => {
+        if (agentData.offDays.includes(btn.textContent.trim() === 'Sun' ? 'Sunday' :
+          btn.textContent.trim() === 'Mon' ? 'Monday' :
+          btn.textContent.trim() === 'Tue' ? 'Tuesday' :
+          btn.textContent.trim() === 'Wed' ? 'Wednesday' :
+          btn.textContent.trim() === 'Thu' ? 'Thursday' :
+          btn.textContent.trim() === 'Fri' ? 'Friday' : 'Saturday')) {
+          btn.classList.add('selected');
+        }
+      });
+    }
+
+    // Embed codes
+    const embedCode = `<script src="${BASE_URL}/widget.js" data-agent="${AGENT_ID}" defer><\/script>`;
+    const landingPage = `${BASE_URL}/agent/${AGENT_ID}`;
+    const fbWebhook = `${BASE_URL}/webhook/facebook/${AGENT_ID}`;
+    document.getElementById('embed-code').childNodes[0].textContent = embedCode + '\n';
+    document.getElementById('landing-link').childNodes[0].textContent = landingPage + '\n';
+    document.getElementById('fb-webhook').childNodes[0].textContent = fbWebhook + '\n';
+    document.getElementById('preview-landing').onclick = () => window.open(landingPage, '_blank');
+
+    // Save agent id
+    localStorage.setItem('doorbotai_agent_id', AGENT_ID);
+  } catch (err) {
+    console.error('Dashboard error:', err);
+    document.getElementById('recent-leads').innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--red);padding:32px;">Error: ${err.message}</td></tr>`;
+  }
+}
+
+async function saveTraining() {
+  if (!AGENT_ID) return toast('No agent ID', true);
+  const data = {};
+  ['botName','city','propertyTypes','priceRange','tone','language','calendlyLink','notificationEmail','about','faqs','situationalScripts','objectionHandling'].forEach(k => {
+    const el = document.getElementById('t-' + k);
+    if (el) data[k] = el.value;
+  });
+  try {
+    const res = await fetch(`${BASE_URL}/api/train/${AGENT_ID}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (result.success) toast('Bot updated! Changes are live instantly.');
+    else toast('Error: ' + result.error, true);
+  } catch (err) { toast('Error saving', true); }
+}
+
+function toggleDay(btn, day) {
+  btn.classList.toggle('selected');
+}
+
+async function saveOffDays() {
+  if (!AGENT_ID) return;
+  const dayMap = {'Sun':'Sunday','Mon':'Monday','Tue':'Tuesday','Wed':'Wednesday','Thu':'Thursday','Fri':'Friday','Sat':'Saturday'};
+  const offDays = [];
+  document.querySelectorAll('.day-btn.selected').forEach(b => offDays.push(dayMap[b.textContent.trim()]));
+  try {
+    await fetch(`${BASE_URL}/api/train/${AGENT_ID}`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ offDays })
+    });
+    toast('Off days saved!');
+  } catch(err) { toast('Error', true); }
+}
+
+async function uploadCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const lines = e.target.result.trim().split('\n');
+    const headers = lines[0].toLowerCase().split(',').map(h => h.trim());
+    const leads = lines.slice(1).map(line => {
+      const vals = line.split(',');
+      const lead = {};
+      headers.forEach((h, i) => lead[h] = (vals[i] || '').trim());
+      return lead;
+    }).filter(l => l.phone);
+
+    document.getElementById('csv-result').textContent = `Processing ${leads.length} leads...`;
+    try {
+      const res = await fetch(`${BASE_URL}/api/leads/upload/${AGENT_ID}`, {
+        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ leads })
+      });
+      const data = await res.json();
+      document.getElementById('csv-result').textContent = `Done! ${data.processed} processed, ${data.called} calls made.`;
+      toast(`${data.processed} leads uploaded!`);
+    } catch(err) {
+      document.getElementById('csv-result').textContent = 'Error uploading.';
+    }
+  };
+  reader.readAsText(file);
+}
+
+async function startScraper() {
+  if (!AGENT_ID) return;
+  document.getElementById('scraper-result').textContent = 'Starting scraper...';
+  try {
+    const res = await fetch(`${BASE_URL}/api/scrape/${AGENT_ID}`, { method: 'POST' });
+    const data = await res.json();
+    document.getElementById('scraper-result').textContent = data.message || 'Scraper started!';
+    toast('Scraper started! Check leads in 2 minutes.');
+  } catch(err) {
+    document.getElementById('scraper-result').textContent = 'Error starting scraper.';
+  }
+}
+
+// Init
+loadDashboard();
+</script>
+</body>
+</html>
